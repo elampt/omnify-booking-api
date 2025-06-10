@@ -36,6 +36,10 @@ A simple FastAPI backend for booking fitness classes (Yoga, Zumba, HIIT) with ti
 
 4. **Running Tests**
    ```sh
+   python -c "from database import initialize_database; initialize_database()"
+   ```
+   
+   ```sh
    pytest tests/test_api.py
    ```
    You should see output indicating all tests have passed
