@@ -1,7 +1,7 @@
+import os
+from models import Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base
-import os
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "db.sqlite3")
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"

@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime
 from pydantic import ConfigDict
+from pydantic import BaseModel, Field, EmailStr
 
 class ClassResponse(BaseModel):
     id: int

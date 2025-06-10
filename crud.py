@@ -1,9 +1,11 @@
-from models import FitnessClass, Booking
-from schemas import BookingRequest, BookingResponse, ClassResponse
+import logging
+from datetime import datetime
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from utils.timezone import convert_ist_to_timezone
-from datetime import datetime
-import logging
+
+from models import FitnessClass, Booking
+from schemas import BookingRequest, BookingResponse, ClassResponse
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +27,10 @@ def book_class(db: Session, booking_request: BookingRequest):
     fitness_class = db.query(FitnessClass).filter(FitnessClass.id == booking_request.class_id).first()
     if not fitness_class:
         logger.error(f"Class with ID {booking_request.class_id} not found")
-        return None  # Class not found
+        raise HTTPException(status_code=404, detail="Class not found")
     if fitness_class.available_slots <= 0:
         logger.error(f"No available slots for class ID {booking_request.class_id}")
-        raise ValueError("No available slots for this class")
+        raise HTTPException(status_code=400, detail="No available slots for this class")
     # Prevent duplicate bookings for the same class and email
     existing = db.query(Booking).filter(
         Booking.class_id == booking_request.class_id,
@@ -36,7 +38,7 @@ def book_class(db: Session, booking_request: BookingRequest):
     ).first()
     if existing:
         logger.warning(f"Duplicate booking attempt for class ID {booking_request.class_id} by {booking_request.client_email}")
-        raise ValueError("You have already booked this class")
+        raise HTTPException(status_code=400, detail="You have already booked this class")
     
     booking = Booking(
         class_id=booking_request.class_id,
@@ -60,7 +62,7 @@ def get_bookings(db: Session, client_email: str):
     bookings = db.query(Booking).filter(Booking.client_email == client_email).all()
     if not bookings:
         logger.info(f"No bookings found for email: {client_email}")
-        return []  # No bookings found for this email
+        raise HTTPException(status_code=404, detail="No bookings found for this email")
     result = []
     for b in bookings:
         fc = db.query(FitnessClass).filter(FitnessClass.id == b.class_id).first()
